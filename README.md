@@ -11,5 +11,6 @@ docker-compose up
 Check Wordpress version (must be either `4.7.0` or `4.7.1`):
 
 ```bash
-docker exec -it <wordpress-container-id> cat wp-includes/version.php | grep "wp_version ="
+docker ps | grep wordpress
+./get_version.sh <wordpress-container-id>
 ```
