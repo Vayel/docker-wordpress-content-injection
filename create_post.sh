@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./env.sh
+. ./.env
 
 title=mypost
 content=mycontent

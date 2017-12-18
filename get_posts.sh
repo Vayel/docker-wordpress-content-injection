@@ -1,5 +1,5 @@
 #!/bin/bash
 
-. ./env.sh
+. ./.env
 
-curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X GET --user "$USER":"$PASSWORD" $POSTS_ENDPOINT
+curl --user "$USER":"$PASSWORD" $POSTS_ENDPOINT
