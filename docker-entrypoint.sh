@@ -24,33 +24,6 @@ file_env() {
 }
 
 if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
-	if ! [ -e index.php -a -e wp-includes/version.php ]; then
-		echo >&2 "WordPress not found in $PWD - copying now..."
-		if [ "$(ls -A)" ]; then
-			echo >&2 "WARNING: $PWD is not empty - press Ctrl+C now if this is an error!"
-			( set -x; ls -A; sleep 10 )
-		fi
-		tar cf - --one-file-system -C /usr/src/wordpress . | tar xf -
-		echo >&2 "Complete! WordPress has been successfully copied to $PWD"
-        git clone https://github.com/WP-API/Basic-Auth wp-content/plugins/Basic-Auth
-		if [ ! -e .htaccess ]; then
-			# NOTE: The "Indexes" option is disabled in the php:apache base image
-			cat > .htaccess <<-'EOF'
-				# BEGIN WordPress
-				<IfModule mod_rewrite.c>
-				RewriteEngine On
-				RewriteBase /
-				RewriteRule ^index\.php$ - [L]
-				RewriteCond %{REQUEST_FILENAME} !-f
-				RewriteCond %{REQUEST_FILENAME} !-d
-				RewriteRule . /index.php [L]
-				</IfModule>
-				# END WordPress
-			EOF
-			chown www-data:www-data .htaccess
-		fi
-	fi
-
 	# TODO handle WordPress upgrades magically in the same way, but only if wp-includes/version.php's $wp_version is less than /usr/src/wordpress/wp-includes/version.php's $wp_version
 
 	# allow any of these "Authentication Unique Keys and Salts." to be specified via
