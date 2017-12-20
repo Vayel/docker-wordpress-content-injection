@@ -2,6 +2,10 @@
 
 . ./.env
 
-title=mypost
-content=mycontent
-curl --data "title=$title&content=$content&status=publish" --user "$USER":"$PASSWORD" $POSTS_ENDPOINT
+if [[ -z "$2" ]]
+then
+    echo "Usage: ./create_post.sh <one-word-title> <one-word-content>"
+    exit 1
+fi
+
+post_api $POSTS_ENDPOINT "title=$1&content=$2&status=publish"
