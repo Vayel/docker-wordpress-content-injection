@@ -90,7 +90,7 @@ public function update_item_permissions_check( $request ) {
 }
 ```
 
-**Surprinsingly, if `$post` is null, the function does not return an error.** Let's
+**Surprisingly, if `$post` is null, the function does not return an error.** Let's
 give a look at
 [`wp-includes/post.php:get_post`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/post.php#L515):
 
@@ -141,19 +141,20 @@ public function update_item( $request ) {
     $id = (int) $request['id'];
     // $id == 11
     // Here, `get_post` does not return `null`
+    // Then, we do not enter the `if` which returns an error
     $post = get_post( $id );
     if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
         return new WP_Error( 'rest_post_invalid_id', __( 'Invalid post ID.' ), array( 'status' => 404 ) );
     }
-    // Update the item
+    // The item will be updated
     // ...
 }
 ```
 
 This time, the function `get_post` is called **with the id cast as an integer**. Due
 to PHP [type-juggling](http://php.net/manual/en/language.types.type-juggling.php),
-the variable `$id` will be equal to `11` (`(int)"11ABC" === 11`). So `get_post` won't
-return `null` and we won't enter the `if` in which an error is returned. **Because we have already
+the variable `$id` will be equal to `11`. So `get_post` won't return `null` and `update_item`
+won't return an error. **Because we have already
 passed the permission check step**, the post with id `11` will be updated
 even if it belongs to another user.
 
