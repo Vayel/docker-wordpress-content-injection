@@ -2,7 +2,7 @@
 
 if [[ -z "$1" ]]
 then
-    echo "Usage: ./dump_db.sh <container-id>"
+    echo "Usage: ./dump_db.sh <mysql-container-id>"
     exit 1
 fi
 

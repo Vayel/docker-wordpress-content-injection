@@ -2,7 +2,7 @@
 
 if [[ -z "$1" ]]
 then
-    echo "Usage: ./load_db.sh <container-id>"
+    echo "Usage: ./load_db.sh <mysql-container-id>"
     exit 1
 fi
 
