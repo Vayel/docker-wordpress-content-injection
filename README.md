@@ -13,6 +13,7 @@ docker ps | grep dockerwordpresscontentinjection_db
 ```
 
 * Open [http://127.0.0.1:8080/wp-admin/index.php](http://127.0.0.1:8080/wp-admin/index.php)
+* Login: `admin/admin`
 * Check Wordpress version (should be 4.7 or 4.7.1): W (top left) > About Wordpress
 * Play with the API using the scripts `get_posts.sh` and `create_post.sh`
 
