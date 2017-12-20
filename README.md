@@ -22,26 +22,26 @@ The requests are handled in `wordpress/wp-includes/rest-api/endpoints/class-wp-r
 The route needs a post id in the url:
 
 ```bash
-./get_post.sh
+./get_post.sh 10
 ```
 
 If the id is not numeric, the API returns an error because the url does not match the regex:
 
 ```bash
-./get_post_non_numeric.sh
+./get_post.sh 10ABC
 ```
 
 If a query param `id` is specified, its value overrides the one in the url body:
 
 ```bash
-./get_post_query_param.sh
+./get_post_query_param.sh 10 11
 # The obtained id is 11 and not 10
 ```
 
 **But if the query param id is not numeric, no errors are raised:**
 
 ```bash
-./get_post_query_param_non_numeric.sh
+./get_post_query_param.sh 10 11ABC
 ```
 
 Now, let's take the request `POST /wp-json/wp/v2/posts/10?id=11ABC` and look at
