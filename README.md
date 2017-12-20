@@ -38,7 +38,7 @@ If a query param `id` is specified, its value overrides the one in the url body:
 # The obtained id is 11 and not 10
 ```
 
-But if the query param id is not numeric, no errors are raised:
+**But if the query param id is not numeric, no errors are raised:**
 
 ```bash
 ./get_post_query_param_non_numeric.sh
@@ -86,7 +86,7 @@ public function update_item_permissions_check( $request ) {
 }
 ```
 
-Surprinsingly, if `$post` is null, the functions does not return an error. And,
+**Surprinsingly, if `$post` is null, the functions does not return an error.** And,
 as we saw above, with a request such as
 `POST http://127.0.0.1:8080/wp-json/wp/v2/posts/10?id=11ABC` the function will be
 called with `$request['id'] = "11ABC"` and will call [`wp-includes/post.php:get_post`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/post.php#L515):
@@ -169,11 +169,12 @@ public function update_item( $request ) {
 }
 ```
 
-But, here, the function `get_post` is called with the id cast as an integer. Due
+But, here, the function `get_post` is called **with the id cast as an integer**. Due
 to [PHP's type-juggling](http://php.net/manual/en/language.types.type-juggling.php),
-the variable `$id` will be equal to `11` (`(int)"11ABC" === 11`). Because we
-passed the permission check step, Wordpress will update the post with id `11`
+the variable `$id` will be equal to `11` (`(int)"11ABC" === 11`). So `$post` won't
+be `null` and we won't enter the `if`. **Because we have already
+passed the permission check step**, Wordpress will update the post with id `11`
 even if it belongs to another user.
 
-To conclude, it is possible for anyone to update any post with id `N` with a request such
-as `POST /wp-json/wp/v2/posts/1?id=N_non_numeric_chars`.
+**To conclude, it is possible for anyone to update any post of id `N` with a request such
+as `POST /wp-json/wp/v2/posts/1984?id=N_then_non_numeric_chars`.**
