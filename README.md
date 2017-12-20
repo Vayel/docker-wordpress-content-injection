@@ -44,7 +44,8 @@ If a query param `id` is specified, its value overrides the one in the url body:
 ./get_post_query_param_non_numeric.sh
 ```
 
-Now, let's look at the route to [update a post](https://github.com/Vayel/docker-wordpress-content-injection/blob/master/wordpress/wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php#L93):
+Now, let's take the request `POST /wp-json/wp/v2/posts/10?id=11ABC` and look at
+the route to [update a post](https://github.com/Vayel/docker-wordpress-content-injection/blob/master/wordpress/wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php#L93):
 
 ```php
 // wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php#L93
@@ -68,7 +69,7 @@ is called:
 // wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php#L589
 
 public function update_item_permissions_check( $request ) {
-    // $request['id'] == "11ABC"
+    // Because we sent the id in the query param, $request['id'] == "11ABC"
     $post = get_post( $request['id'] );
     $post_type = get_post_type_object( $this->post_type );
 
@@ -89,34 +90,33 @@ public function update_item_permissions_check( $request ) {
 }
 ```
 
-**Surprinsingly, if `$post` is null, the function does not return an error.** As
-we saw above, with a request such as
-`POST http://127.0.0.1:8080/wp-json/wp/v2/posts/10?id=11ABC` the function will be
-called with `$request['id'] = "11ABC"`. Then, it will call [`wp-includes/post.php:get_post`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/post.php#L515) with this value:
+**Surprinsingly, if `$post` is null, the function does not return an error.** Let's
+give a look at
+[`wp-includes/post.php:get_post`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/post.php#L515):
 
 ```php
 // wp-includes/post.php#L515
 
 function get_post( $post = null, $output = OBJECT, $filter = 'raw' ) {
     // $post == "11ABC"
-	if ( empty( $post ) && isset( $GLOBALS['post'] ) )
-		$post = $GLOBALS['post'];
-	if ( $post instanceof WP_Post ) {
-		$_post = $post;
-	} elseif ( is_object( $post ) ) {
+    if ( empty( $post ) && isset( $GLOBALS['post'] ) )
         // ...
-	} else { // As $post is a string, we enter here
-		$_post = WP_Post::get_instance( $post );
-	}
-    // Because `WP_Post::get_instance( $post );` will return `false` (see below)
+    if ( $post instanceof WP_Post ) {
+        // ...
+    } elseif ( is_object( $post ) ) {
+        // ...
+    } else { // As $post is a string, we enter here
+        $_post = WP_Post::get_instance( $post );
+    }
+    // Because `WP_Post::get_instance( $post );` will return `false` (see explanations below)
     // the function returns `null`
-	if ( ! $_post )
-		return null;
+    if ( ! $_post )
+        return null;
     // ...
 }
 ```
 
-Then [`wp-includes/class-wp-post.php:WP_Post::get_instance`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/class-wp-post.php#L210)
+[`wp-includes/class-wp-post.php:WP_Post::get_instance`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/class-wp-post.php#L210)
 will return `false` as `$post_id` is not numeric:
 
 ```php
@@ -137,7 +137,10 @@ will be called with `$request['id'] = "11ABC"`:
 
 ```php
 public function update_item( $request ) {
-    $id   = (int) $request['id'];
+    // $request['id'] == "11ABC"
+    $id = (int) $request['id'];
+    // $id == 11
+    // Here, `get_post` does not return `null`
     $post = get_post( $id );
     if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
         return new WP_Error( 'rest_post_invalid_id', __( 'Invalid post ID.' ), array( 'status' => 404 ) );
@@ -147,7 +150,7 @@ public function update_item( $request ) {
 }
 ```
 
-But, here, the function `get_post` is called **with the id cast as an integer**. Due
+This time, the function `get_post` is called **with the id cast as an integer**. Due
 to PHP [type-juggling](http://php.net/manual/en/language.types.type-juggling.php),
 the variable `$id` will be equal to `11` (`(int)"11ABC" === 11`). So `get_post` won't
 return `null` and we won't enter the `if` in which an error is returned. **Because we have already
