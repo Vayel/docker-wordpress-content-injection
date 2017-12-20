@@ -14,7 +14,22 @@ docker ps | grep dockerwordpresscontentinjection_db
 ./load_db.sh <mysql-container-id>
 ```
 
-* Test the API: `./list_posts.sh`
+* Test the API:
+
+```bash
+./list_posts.sh
+./create_post.sh mytitle mycontent
+```
+
+If you cannot create a post, you need to install the plugin [`JSON Basic Authentication`](https://github.com/WP-API/Basic-Auth):
+
+* Download the plugin as zip
+* Login on [WordPress admin](http://127.0.0.1:8080/wp-admin) (`admin/admin`)
+* Go to [plugin page](http://127.0.0.1:8080/wp-admin/plugins.php)
+* Add New
+* Upload Plugin
+* Select the .zip
+* The plugin `JSON Basic Authentication` should appear on the plugins page. Activate it.
 
 # Exploit
 
@@ -202,4 +217,10 @@ Update a post of author2 with author1 and a malicious url:
 ```bash
 ./exploit.sh 17 mysupercontent author1
 # It works
+```
+
+The content has changed:
+
+```bash
+./get_post.sh 17
 ```
