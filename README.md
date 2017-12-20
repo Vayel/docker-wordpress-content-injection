@@ -5,17 +5,16 @@ https://www.cvedetails.com/cve/CVE-2017-1001000/
 ## Install
 
 ```bash
+# Launch two containers: mysql and wordpress
 docker-compose up
 
 # In another terminal
+# Get the id of the mysql container
 docker ps | grep dockerwordpresscontentinjection_db
 ./load_db.sh <mysql-container-id>
 ```
 
-* Open [http://127.0.0.1:8080/wp-admin/index.php](http://127.0.0.1:8080/wp-admin/index.php)
-* Login: `admin/admin`
-* Check Wordpress version (should be 4.7 or 4.7.1): W (top left) > About Wordpress
-* Play with the API using the scripts `get_posts.sh` and `create_post.sh`
+* Test the API: `./get_posts.sh`
 
 # Exploit
 
