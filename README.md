@@ -6,8 +6,10 @@ https://www.cvedetails.com/cve/CVE-2017-1001000/
 
 ```bash
 docker-compose up
+
 # In another terminal
-./load_db.sh
+docker ps | grep dockerwordpresscontentinjection_db
+./load_db.sh <mysql-container-id>
 ```
 
 * Open [http://127.0.0.1:8080/wp-admin/index.php](http://127.0.0.1:8080/wp-admin/index.php)
