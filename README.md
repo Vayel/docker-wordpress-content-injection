@@ -14,7 +14,7 @@ docker ps | grep dockerwordpresscontentinjection_db
 ./load_db.sh <mysql-container-id>
 ```
 
-* Test the API: `./get_posts.sh`
+* Test the API: `./list_posts.sh`
 
 # Exploit
 
@@ -174,7 +174,7 @@ docker-compose up
 Get the posts of author1:
 
 ```bash
-./get_posts.sh author1
+./list_posts.sh author1
 ```
 
 Update a post:
@@ -187,7 +187,7 @@ Update a post:
 Get the posts of author2:
 
 ```bash
-./get_posts.sh author2
+./list_posts.sh author2
 ```
 
 Update a post of author2 with author1:
