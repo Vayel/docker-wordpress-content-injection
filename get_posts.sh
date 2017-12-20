@@ -2,4 +2,4 @@
 
 . ./.env
 
-curl --user "$USER":"$PASSWORD" $POSTS_ENDPOINT
+get_api $POSTS_ENDPOINT
