@@ -68,8 +68,11 @@ is called:
 // wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php#L589
 
 public function update_item_permissions_check( $request ) {
+    // $request['id'] == "11ABC"
     $post = get_post( $request['id'] );
     $post_type = get_post_type_object( $this->post_type );
+
+    // Surprisingly, if $post == null, the function does not return an error
     if ( $post && ! $this->check_update_permission( $post ) ) {
         return new WP_Error( 'rest_cannot_edit', __( 'Sorry, you are not allowed to edit this post.' ), array( 'status' => rest_authorization_required_code() ) );
     }
@@ -86,51 +89,34 @@ public function update_item_permissions_check( $request ) {
 }
 ```
 
-**Surprinsingly, if `$post` is null, the functions does not return an error.** And,
-as we saw above, with a request such as
+**Surprinsingly, if `$post` is null, the function does not return an error.** As
+we saw above, with a request such as
 `POST http://127.0.0.1:8080/wp-json/wp/v2/posts/10?id=11ABC` the function will be
-called with `$request['id'] = "11ABC"` and will call [`wp-includes/post.php:get_post`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/post.php#L515):
+called with `$request['id'] = "11ABC"`. Then, it will call [`wp-includes/post.php:get_post`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/post.php#L515) with this value:
 
 ```php
 // wp-includes/post.php#L515
 
 function get_post( $post = null, $output = OBJECT, $filter = 'raw' ) {
+    // $post == "11ABC"
 	if ( empty( $post ) && isset( $GLOBALS['post'] ) )
 		$post = $GLOBALS['post'];
 	if ( $post instanceof WP_Post ) {
 		$_post = $post;
 	} elseif ( is_object( $post ) ) {
-		if ( empty( $post->filter ) ) {
-			$_post = sanitize_post( $post, 'raw' );
-			$_post = new WP_Post( $_post );
-		} elseif ( 'raw' == $post->filter ) {
-			$_post = new WP_Post( $post );
-		} else {
-			$_post = WP_Post::get_instance( $post->ID );
-		}
-	} else {
+        // ...
+	} else { // As $post is a string, we enter here
 		$_post = WP_Post::get_instance( $post );
 	}
+    // Because `WP_Post::get_instance( $post );` will return `false` (see below)
+    // the function returns `null`
 	if ( ! $_post )
 		return null;
-	$_post = $_post->filter( $filter );
-	if ( $output == ARRAY_A )
-		return $_post->to_array();
-	elseif ( $output == ARRAY_N )
-		return array_values( $_post->to_array() );
-	return $_post;
+    // ...
 }
 ```
 
-`$post` will be a string (`"11ABC"`) so we will execute the follow line:
-
-```php
-// wp-includes/post.php#L531
-
-$_post = WP_Post::get_instance( $post );
-```
-
-But [`wp-includes/class-wp-post.php:WP_Post::get_instance`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/class-wp-post.php#L210)
+Then [`wp-includes/class-wp-post.php:WP_Post::get_instance`](https://github.com/Vayel/docker-wordpress-content-injection/blob/145c8df686c1ccf73d136d7a3c9204eeab98272a/wordpress/wp-includes/class-wp-post.php#L210)
 will return `false` as `$post_id` is not numeric:
 
 ```php
@@ -145,16 +131,7 @@ public static function get_instance( $post_id ) {
 }
 ```
 
-Then `get_post` will return `null`:
-
-```php
-// wp-includes/post.php#L534
-
-if ( ! $_post )
-    return null;
-```
-
-So the permission check will pass. The function
+So `get_post` will return `null` and the permission check will pass. Then, the function
 [`wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php:update_item`](https://github.com/Vayel/docker-wordpress-content-injection/blob/master/wordpress/wp-includes/rest-api/endpoints/class-wp-rest-posts-controller.php#L622)
 will be called with `$request['id'] = "11ABC"`:
 
@@ -165,16 +142,21 @@ public function update_item( $request ) {
     if ( empty( $id ) || empty( $post->ID ) || $this->post_type !== $post->post_type ) {
         return new WP_Error( 'rest_post_invalid_id', __( 'Invalid post ID.' ), array( 'status' => 404 ) );
     }
+    // Update the item
     // ...
 }
 ```
 
 But, here, the function `get_post` is called **with the id cast as an integer**. Due
-to [PHP's type-juggling](http://php.net/manual/en/language.types.type-juggling.php),
-the variable `$id` will be equal to `11` (`(int)"11ABC" === 11`). So `$post` won't
-be `null` and we won't enter the `if`. **Because we have already
-passed the permission check step**, Wordpress will update the post with id `11`
+to PHP [type-juggling](http://php.net/manual/en/language.types.type-juggling.php),
+the variable `$id` will be equal to `11` (`(int)"11ABC" === 11`). So `get_post` won't
+return `null` and we won't enter the `if` in which an error is returned. **Because we have already
+passed the permission check step**, the post with id `11` will be updated
 even if it belongs to another user.
 
-**To conclude, it is possible for anyone to update any post of id `N` with a request such
-as `POST /wp-json/wp/v2/posts/1984?id=N_then_non_numeric_chars`.**
+To conclude, it is possible for anyone to update any post of id `N` with a request such
+as `POST /wp-json/wp/v2/posts/1984?id=N_then_non_numeric_chars`.
+
+## Demo
+
+TODO
