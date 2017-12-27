@@ -6,7 +6,6 @@ services:
     image: mysql:5.7
     volumes:
       - db_data:/var/lib/mysql
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -18,7 +17,6 @@ services:
       - db
     build: .
     image: wordpress:4.7
-    restart: always
     volumes:
       - ./wordpress:/var/www/html
     ports:
