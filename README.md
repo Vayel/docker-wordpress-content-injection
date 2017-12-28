@@ -229,3 +229,9 @@ The content has changed:
 ```bash
 ./get_post.sh 17
 ```
+
+Stop the containers:
+```bash
+docker-compose stop
+docker-compose rm
+```
