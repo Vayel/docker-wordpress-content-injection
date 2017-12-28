@@ -8,7 +8,11 @@ https://www.cvedetails.com/cve/CVE-2017-1001000/
 # Launch two containers: mysql and wordpress
 docker-compose up
 ```
-You might need to install `docker-compose` first. If you get an error "Couldn't connect to Docker daemon", run it (and the following docker commands) with `sudo`.
+
+**Warning:** a vulnerable Wordpress will be available on port `8080`.
+
+You might need to install `docker-compose` first. If you get an error
+`Couldn't connect to Docker daemon`, run it (and the following docker commands) with `sudo`.
 
 
 ```bash
@@ -201,7 +205,7 @@ Update a post:
 
 ```bash
 ./update_post.sh 14 mysupercontent author1
-# It works
+./get_post.sh 14 # The content has changed
 ```
 
 Get the posts of author2:
@@ -221,16 +225,11 @@ Update a post of author2 with author1 and a malicious url:
 
 ```bash
 ./exploit.sh 17 mysupercontent author1
-# It works
-```
-
-The content has changed:
-
-```bash
-./get_post.sh 17
+./get_post.sh 17 # The content has changed
 ```
 
 Stop the containers:
+
 ```bash
 docker-compose stop
 docker-compose rm
