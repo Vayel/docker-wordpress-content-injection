@@ -189,10 +189,12 @@ as `POST /wp-json/wp/v2/posts/1984?id=N_then_non_numeric_chars`.
 
 ## Demo
 
-Make sure Wordpress is running:
+Make sure Wordpress is running and the database is loaded:
 
 ```bash
 docker-compose up
+docker ps | grep dockerwordpresscontentinjection_db
+./load_db.sh <mysql-container-id>
 ```
 
 Get the posts of author1:
