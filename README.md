@@ -7,12 +7,17 @@ https://www.cvedetails.com/cve/CVE-2017-1001000/
 ```bash
 # Launch two containers: mysql and wordpress
 docker-compose up
+```
+You might need to install `docker-compose` first. If you get an error "Couldn't connect to Docker daemon", run it (and the following docker commands) with `sudo`.
 
+
+```bash
 # In another terminal
 # Get the id of the mysql container
 docker ps | grep dockerwordpresscontentinjection_db
 ./load_db.sh <mysql-container-id>
 ```
+You can ignore the MySQL warning if you get one.
 
 * Test the API:
 
